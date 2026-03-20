@@ -26,6 +26,7 @@ export const DEMO_USER: DemoUser = {
   industry: 'Technology',
 };
 
+// Full set of demo transactions for dashboard
 export const DEMO_TRANSACTIONS: DemoTransaction[] = [
   // Air Travel
   { id: '1', date: '2025-01-05', description: 'Flight SG → NYC (business)', category: 'air_travel', amount_usd: 1200, co2_kg: 480, source: 'demo' },
@@ -59,6 +60,7 @@ export const DEMO_TRANSACTIONS: DemoTransaction[] = [
   { id: '17', date: '2025-02-20', description: 'Equipment purchase', category: 'retail_ecommerce', amount_usd: 450, co2_kg: 42.75, source: 'demo' },
 ];
 
+// AI insights for demo dashboard
 export const DEMO_AI_INSIGHT = {
   headline: "Reduce air travel emissions by 40% through virtual meetings.",
   top_category_insight: {
@@ -107,6 +109,7 @@ export const DEMO_AI_INSIGHT = {
   benchmark_note: "Your carbon intensity (0.142 kg CO₂/$) is 18% better than the technology sector average (0.173 kg CO₂/$), but there's room to reach best-in-class (0.08 kg CO₂/$)."
 };
 
+// Demo mode helpers
 export function isDemoMode(): boolean {
   return typeof window !== 'undefined' && localStorage.getItem('ecotrace_demo_mode') === 'true';
 }
