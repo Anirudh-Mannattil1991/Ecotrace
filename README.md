@@ -2,9 +2,7 @@
 
 **Decarbonizing Commerce, One Transaction at a Time.**
 
-> Built for Ignite Hack 2.0 · Full-Stack AI Sustainability Dashboard for SMEs
-
-![Dashboard Screenshot](./screenshots/dashboard.png)
+> Built for Sustainability· Full-Stack AI Sustainability Dashboard for SMEs
 
 ---
 
