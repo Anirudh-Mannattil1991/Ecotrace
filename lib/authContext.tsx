@@ -11,6 +11,7 @@ interface AuthContextType {
   loading: boolean;
   isDemoUser: boolean;
   signOut: () => Promise<void>;
+  loginAsDemo: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isDemoUser: false,
   signOut: async () => {},
+  loginAsDemo: () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -27,38 +29,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isDemoUser, setIsDemoUser] = useState(false);
 
+  // Demo login helper
+  const loginAsDemo = () => {
+    setUser({
+      id: DEMO_USER.id,
+      email: DEMO_USER.email,
+      email_confirmed_at: new Date().toISOString(),
+      phone: undefined,
+      confirmed_at: new Date().toISOString(),
+      last_sign_in_at: new Date().toISOString(),
+      app_metadata: {},
+      user_metadata: {
+        company_name: DEMO_USER.company_name,
+        industry: DEMO_USER.industry,
+      },
+      aud: 'authenticated',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as User);
+    setIsDemoUser(true);
+    setSession(null);
+    setLoading(false);
+    localStorage.setItem('ecotrace_demo_mode', 'true');
+  };
+
   useEffect(() => {
-    // Check if demo mode is enabled
-    if (isDemoMode()) {
-      setIsDemoUser(true);
-      setUser({
-        id: DEMO_USER.id,
-        email: DEMO_USER.email,
-        email_confirmed_at: new Date().toISOString(),
-        phone: undefined,
-        confirmed_at: new Date().toISOString(),
-        last_sign_in_at: new Date().toISOString(),
-        app_metadata: {},
-        user_metadata: {
-          company_name: DEMO_USER.company_name,
-          industry: DEMO_USER.industry,
-        },
-        aud: 'authenticated',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as User);
+    // If previously in demo mode, auto-login demo
+    if (localStorage.getItem('ecotrace_demo_mode') === 'true') {
+      loginAsDemo();
+      return;
+    }
+
+    // Otherwise, check Supabase session (skip if supabase client is null)
+    if (!supabase) {
       setLoading(false);
       return;
     }
 
-    // Otherwise, fetch real session from Supabase
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -74,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       setIsDemoUser(false);
       localStorage.removeItem('ecotrace_demo_mode');
-    } else {
+    } else if (supabase) {
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
@@ -82,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isDemoUser, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isDemoUser, signOut, loginAsDemo }}>
       {children}
     </AuthContext.Provider>
   );
