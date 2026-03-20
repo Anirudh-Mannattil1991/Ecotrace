@@ -1,21 +1,19 @@
-// /lib/supabase.ts
 import { createClient } from '@supabase/supabase-js';
 
-// Use environment variables, but allow null for demo mode
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Only create the client if we have valid credentials
-export const supabase = (supabaseUrl && supabaseAnonKey)
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+export const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey)
+    : null;
 
-// Server-side admin client (for API routes)
-// Only create if URL and service key exist
+// Server-side admin client (only for API routes)
 export function createAdminClient() {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceRoleKey) return null;
-
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Missing Supabase URL or service role key');
+  }
   return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
@@ -24,27 +22,13 @@ export function createAdminClient() {
   });
 }
 
-// Type definitions for your database
 export type Database = {
   public: {
     Tables: {
       profiles: {
-        Row: {
-          id: string;
-          company_name: string | null;
-          industry: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id: string;
-          company_name?: string | null;
-          industry?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          company_name?: string | null;
-          industry?: string | null;
-        };
+        Row: { id: string; company_name: string | null; industry: string | null; created_at: string };
+        Insert: { id: string; company_name?: string | null; industry?: string | null; created_at?: string };
+        Update: { company_name?: string | null; industry?: string | null };
       };
       transactions: {
         Row: {
@@ -79,24 +63,9 @@ export type Database = {
         };
       };
       ai_insights: {
-        Row: {
-          id: string;
-          user_id: string;
-          generated_at: string;
-          top_category: string | null;
-          insight_json: Record<string, unknown> | null;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          generated_at?: string;
-          top_category?: string | null;
-          insight_json?: Record<string, unknown> | null;
-        };
-        Update: {
-          top_category?: string | null;
-          insight_json?: Record<string, unknown> | null;
-        };
+        Row: { id: string; user_id: string; generated_at: string; top_category: string | null; insight_json: Record<string, unknown> | null };
+        Insert: { id?: string; user_id: string; generated_at?: string; top_category?: string | null; insight_json?: Record<string, unknown> | null };
+        Update: { top_category?: string | null; insight_json?: Record<string, unknown> | null };
       };
     };
   };
